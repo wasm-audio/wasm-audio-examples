@@ -1,0 +1,9 @@
+[package]
+name = "wasm-cm3-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+wasmtime = "21.0.1"
+wasmtime-wasi = "21.0.1"

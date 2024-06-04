@@ -1,0 +1,8 @@
+package component:wasm-cm3;
+
+/// An example world for the component to target.
+world example {
+    export set-sr: func(sr: f32);
+    export set-freq: func(freq: f32);
+    export process: func(input: list<f32>) -> list<f32>;
+}
