@@ -28,7 +28,7 @@ impl Guest for Component {
         let delta_phase = frequency / sample_rate;
 
         let mut output = Vec::with_capacity(input.len());
-        println!("input: {:?}", input);
+        // println!("input: {:?}", input);
         for _ in 0..input.len() {
             *phase += delta_phase;
             if *phase > 1.0 {

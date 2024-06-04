@@ -1,2 +1,1 @@
-cd guest
-cargo component build -r
+cd guest && cargo component build -r
