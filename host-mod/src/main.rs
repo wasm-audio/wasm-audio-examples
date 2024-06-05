@@ -10,6 +10,9 @@ use wasmtime::{
     Config, Engine, Store,
 };
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
+
+use hashbrown::HashMap;
+
 fn main() -> anyhow::Result<()> {
     let host = cpal::default_host();
 
@@ -58,7 +61,7 @@ where
     let sample_rate = config.sample_rate.0 as f32;
     let sin_processor = load_wasm(
         "./sin.wasm",
-        hashbrown::HashMap::from_iter([
+        HashMap::from_iter([
             ("set-freq", Val::Float32(220.0)),
             ("set-sr", Val::Float32(sample_rate)),
         ]),
@@ -108,21 +111,25 @@ where
 
     // after 1 second, push mul processor
 
-    std::thread::sleep(std::time::Duration::from_millis(1000));
+    std::thread::sleep(std::time::Duration::from_millis(2000));
 
-    let mul_processor = load_wasm(
-        "./mul.wasm",
-        hashbrown::HashMap::from_iter([("set-factor", Val::Float32(0.5))]),
+    for i in 0..200 {
+        println!("pushing mul processor no {}", i);
+        let mul_processor = load_wasm(
+            "./mul.wasm",
+            HashMap::from_iter([("set-factor", Val::Float32(0.99))]),
+        )?;
+        processors_clone.lock().push(mul_processor);
+    }
+
+    std::thread::sleep(std::time::Duration::from_millis(2000));
+
+    // now we push another sin processor to the end which will ignore the previous mul processors
+    let p = load_wasm(
+        "./sin.wasm",
+        HashMap::from_iter([("set-freq", Val::Float32(219.0))]),
     )?;
-    processors_clone.lock().push(mul_processor);
-
-    std::thread::sleep(std::time::Duration::from_millis(1000));
-
-    let mul_processor = load_wasm(
-        "./mul.wasm",
-        hashbrown::HashMap::from_iter([("set-factor", Val::Float32(0.5))]),
-    )?;
-    processors_clone.lock().push(mul_processor);
+    processors_clone.lock().push(p);
 
     // make it forever
     std::thread::park();
@@ -131,7 +138,7 @@ where
 
 fn load_wasm(
     name: &str,
-    args: hashbrown::HashMap<&str, Val>,
+    args: HashMap<&str, Val>,
 ) -> anyhow::Result<Arc<Mutex<dyn FnMut(Val) -> Val + Send + Sync>>> {
     let mut wasm_config = Config::default();
     wasm_config.wasm_component_model(true);
