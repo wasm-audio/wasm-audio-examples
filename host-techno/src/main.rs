@@ -101,6 +101,8 @@ where
         config,
         move |data: &mut [T], _: &cpal::OutputCallbackInfo| {
             let length = data.len() / channels;
+            let max_time = 1.0 / sample_rate * length as f32;
+            let start = std::time::Instant::now();
 
             let func = instance
                 .get_func(&mut store, "process")
@@ -129,6 +131,10 @@ where
                 data[i * channels] = val;
                 data[i * channels + 1] = val;
             }
+            let elapsed = start.elapsed().as_secs_f32();
+            let perc = elapsed / max_time;
+
+            println!("perc: {}%", perc * 100.0);
         },
         err_fn,
         None,
