@@ -8,7 +8,7 @@ use parking_lot::Mutex;
 
 lazy_static! {
     static ref PHASE: Mutex<f32> = Mutex::new(0.0);
-    static ref FREQUENCY: Mutex<f32> = Mutex::new(0.0);
+    static ref FREQUENCY: Mutex<f32> = Mutex::new(440.0);
     static ref SAMPLE_RATE: Mutex<f32> = Mutex::new(48000.0);
 }
 

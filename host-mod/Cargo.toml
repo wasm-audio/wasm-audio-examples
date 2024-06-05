@@ -1,0 +1,12 @@
+[package]
+name = "host-mod"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+cpal = "0.15.3"
+parking_lot = "0.12.3"
+wasmtime = "21.0.1"
+wasmtime-wasi = "21.0.1"
+hashbrown = "0.14.5"

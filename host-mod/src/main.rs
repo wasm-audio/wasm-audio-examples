@@ -1,6 +1,9 @@
+use parking_lot::Mutex;
+use std::sync::Arc;
+
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
-    FromSample, Sample, SizedSample, SupportedOutputConfigs, SupportedStreamConfig,
+    FromSample, SizedSample, SupportedStreamConfig,
 };
 use wasmtime::{
     component::{Component, Linker, Val},
@@ -42,16 +45,6 @@ fn main() -> anyhow::Result<()> {
         sample_format => panic!("Unsupported sample format '{sample_format}'"),
     }?;
 
-    // for _ in 0..10 {
-    //     let func = instance
-    //         .get_func(&mut store, "process")
-    //         .expect("greet export not found");
-    //     let input = [Val::List(vec![Val::Float32(1.0), Val::Float32(2.0)])];
-    //     let mut result = [Val::List(vec![Val::Float32(0.0), Val::Float32(0.0)])];
-    //     func.call(&mut store, &input, &mut result)?;
-    //     println!("{:?}", result);
-    //     func.post_return(&mut store)?;
-    // }
     Ok(())
 }
 
@@ -59,25 +52,19 @@ pub fn run<T>(device: &cpal::Device, config: &cpal::StreamConfig) -> Result<(), 
 where
     T: SizedSample + FromSample<f32>,
 {
-    let mut wasm_config = Config::default();
-    wasm_config.wasm_component_model(true);
-    let engine = Engine::new(&wasm_config)?;
-    let mut linker = Linker::new(&engine);
-    wasmtime_wasi::add_to_linker_sync(&mut linker).expect("Failed to link command world");
+    let processors = Arc::new(Mutex::new(vec![]));
+    let processors_clone = Arc::clone(&processors);
 
-    let wasi_view = ServerWasiView::new();
-    let mut store = Store::new(&engine, wasi_view);
+    let sample_rate = config.sample_rate.0 as f32;
+    let sin_processor = load_wasm(
+        "./sin.wasm",
+        hashbrown::HashMap::from_iter([
+            ("set-freq", Val::Float32(220.0)),
+            ("set-sr", Val::Float32(sample_rate)),
+        ]),
+    )?;
+    processors.lock().push(sin_processor);
 
-    let bytes = std::fs::read("guest/target/wasm32-wasi/release/wasm_cm3.wasm")?;
-    let component = Component::new(&engine, bytes)?;
-    let instance = linker.instantiate(&mut store, &component)?;
-    let func = instance
-        .get_func(&mut store, "set-freq")
-        .expect("greet export not found");
-    func.call(&mut store, &[Val::Float32(440.0)], &mut [])?;
-    func.post_return(&mut store)?;
-
-    // let sample_rate = config.sample_rate.0 as f32;
     let channels = config.channels as usize;
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
@@ -87,15 +74,13 @@ where
         move |data: &mut [T], _: &cpal::OutputCallbackInfo| {
             let length = data.len() / channels;
 
-            let func = instance
-                .get_func(&mut store, "process")
-                .expect("greet export not found");
-
-            let input = [Val::List(vec![Val::Float32(0.0); length])];
+            // let mut input = [Val::List(vec![Val::Float32(0.0); length])];
             let mut result = [Val::List(vec![Val::Float32(0.0); length])];
 
-            func.call(&mut store, &input, &mut result).unwrap();
-            func.post_return(&mut store).unwrap();
+            for processor in processors.lock().iter_mut() {
+                let mut processor = processor.lock();
+                result[0] = processor(result[0].clone());
+            }
 
             let value = match &result[0] {
                 Val::List(val) => val,
@@ -110,9 +95,6 @@ where
                 })
                 .collect::<Vec<f32>>();
 
-            // let say result is [T; 512]
-            // data is [T; 1024] when channels is 2
-
             for (i, val) in result.iter().enumerate() {
                 let val = T::from_sample(*val);
                 data[i * channels] = val;
@@ -124,10 +106,76 @@ where
     )?;
     stream.play()?;
 
-    // std::thread::sleep(std::time::Duration::from_millis(15000));
-    // make it forever forget
+    // after 1 second, push mul processor
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+
+    let mul_processor = load_wasm(
+        "./mul.wasm",
+        hashbrown::HashMap::from_iter([("set-factor", Val::Float32(0.5))]),
+    )?;
+    processors_clone.lock().push(mul_processor);
+
+    std::thread::sleep(std::time::Duration::from_millis(1000));
+
+    let mul_processor = load_wasm(
+        "./mul.wasm",
+        hashbrown::HashMap::from_iter([("set-factor", Val::Float32(0.5))]),
+    )?;
+    processors_clone.lock().push(mul_processor);
+
+    // make it forever
     std::thread::park();
     Ok(())
+}
+
+fn load_wasm(
+    name: &str,
+    args: hashbrown::HashMap<&str, Val>,
+) -> anyhow::Result<Arc<Mutex<dyn FnMut(Val) -> Val + Send + Sync>>> {
+    let mut wasm_config = Config::default();
+    wasm_config.wasm_component_model(true);
+    let engine = Engine::new(&wasm_config)?;
+    let mut linker = Linker::new(&engine);
+    wasmtime_wasi::add_to_linker_sync(&mut linker).expect("Failed to link command world");
+
+    let wasi_view = ServerWasiView::new();
+    let mut store = Store::new(&engine, wasi_view);
+
+    let bytes = std::fs::read(name)?;
+    let component = Component::new(&engine, bytes)?;
+    let instance = linker.instantiate(&mut store, &component)?;
+
+    for (arg_name, arg_val) in args {
+        let func = instance
+            .get_func(&mut store, arg_name)
+            .expect("func export not found");
+        func.call(&mut store, &[arg_val], &mut [])?;
+        func.post_return(&mut store)?;
+    }
+
+    let func = instance
+        .get_func(&mut store, "process")
+        .expect("func export not found");
+
+    let store = Arc::new(Mutex::new(store));
+    let func = Arc::new(Mutex::new(func));
+
+    let processor = {
+        let store = Arc::clone(&store);
+        let func = Arc::clone(&func);
+
+        move |input: Val| -> Val {
+            let mut store = store.lock();
+            let func = func.lock();
+            let mut result = [Val::List(vec![Val::Float32(0.0); 1024])];
+            func.call(&mut *store, &[input], &mut result).unwrap();
+            func.post_return(&mut *store).unwrap();
+            result[0].clone()
+        }
+    };
+
+    Ok(Arc::new(Mutex::new(processor)))
 }
 
 struct ServerWasiView {

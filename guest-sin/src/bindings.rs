@@ -46,7 +46,7 @@ pub trait Guest {
 }
 #[doc(hidden)]
 
-macro_rules! __export_world_example_cabi{
+macro_rules! __export_world_audio_cabi{
   ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
 
     #[export_name = "set-sr"]
@@ -68,7 +68,7 @@ macro_rules! __export_world_example_cabi{
   };);
 }
 #[doc(hidden)]
-pub(crate) use __export_world_example_cabi;
+pub(crate) use __export_world_audio_cabi;
 #[repr(align(4))]
 struct _RetArea([::core::mem::MaybeUninit<u8>; 8]);
 static mut _RET_AREA: _RetArea = _RetArea([::core::mem::MaybeUninit::uninit(); 8]);
@@ -109,25 +109,24 @@ mod _rt {
 #[allow(unused_macros)]
 #[doc(hidden)]
 
-macro_rules! __export_example_impl {
+macro_rules! __export_audio_impl {
   ($ty:ident) => (self::export!($ty with_types_in self););
   ($ty:ident with_types_in $($path_to_types_root:tt)*) => (
-  $($path_to_types_root)*::__export_world_example_cabi!($ty with_types_in $($path_to_types_root)*);
+  $($path_to_types_root)*::__export_world_audio_cabi!($ty with_types_in $($path_to_types_root)*);
   )
 }
 #[doc(inline)]
-pub(crate) use __export_example_impl as export;
+pub(crate) use __export_audio_impl as export;
 
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:wit-bindgen:0.25.0:example:encoded world"]
+#[link_section = "component-type:wit-bindgen:0.25.0:audio:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 233] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07l\x01A\x02\x01A\x07\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 224] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07e\x01A\x02\x01A\x07\x01\
 @\x01\x02srv\x01\0\x04\0\x06set-sr\x01\0\x01@\x01\x04freqv\x01\0\x04\0\x08set-fr\
-eq\x01\x01\x01pv\x01@\x01\x05input\x02\0\x02\x04\0\x07process\x01\x03\x04\x01\x1a\
-component:wasm-cm3/example\x04\0\x0b\x0d\x01\0\x07example\x03\0\0\0G\x09producer\
-s\x01\x0cprocessed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.2\
-5.0";
+eq\x01\x01\x01pv\x01@\x01\x05input\x02\0\x02\x04\0\x07process\x01\x03\x04\x01\x13\
+component:sin/audio\x04\0\x0b\x0b\x01\0\x05audio\x03\0\0\0G\x09producers\x01\x0c\
+processed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
 
 #[inline(never)]
 #[doc(hidden)]
