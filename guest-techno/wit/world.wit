@@ -1,0 +1,7 @@
+package component:sin;
+
+world audio {
+    export set-sr: func(sr: f32);
+    export set-code: func(code: string);
+    export process: func(input: list<f32>) -> list<f32>;
+}

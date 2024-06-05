@@ -1,7 +1,7 @@
 [workspace]
 default-members = ["host-basic"]
-exclude = ["guest-sin", "guest-mul"]
-members = ["host-basic", "host-mod"]
+# exclude = []
+members = ["host-basic", "host-mod", "host-techno", "guest-sin", "guest-mul", "guest-techno"]
 resolver = "1"
 
 [workspace.package]

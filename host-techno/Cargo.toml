@@ -1,0 +1,10 @@
+[package]
+name = "host-techno"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.86"
+cpal = "0.15.3"
+wasmtime = "21.0.1"
+wasmtime-wasi = "21.0.1"
