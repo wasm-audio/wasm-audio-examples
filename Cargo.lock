@@ -1955,6 +1955,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 name = "sin"
 version = "0.1.0"
 dependencies = [
+ "hashbrown 0.14.5",
  "lazy_static",
  "parking_lot",
  "wit-bindgen-rt",

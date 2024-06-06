@@ -1,6 +1,6 @@
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
-    FromSample, Sample, SizedSample, SupportedOutputConfigs, SupportedStreamConfig,
+    FromSample, SizedSample, SupportedStreamConfig,
 };
 use wasmtime::{
     component::{Component, Linker, Val},
@@ -62,12 +62,31 @@ where
     let component = Component::new(&engine, bytes)?;
     let instance = linker.instantiate(&mut store, &component)?;
     let func = instance
-        .get_func(&mut store, "set-freq")
+        .get_func(&mut store, "set")
         .expect("greet export not found");
-    func.call(&mut store, &[Val::Float32(440.0)], &mut [])?;
+    func.call(
+        &mut store,
+        &[Val::String("freq".to_string()), Val::Float32(440.0)],
+        &mut [],
+    )?;
     func.post_return(&mut store)?;
 
-    // let sample_rate = config.sample_rate.0 as f32;
+    let sample_rate = config.sample_rate.0 as f32;
+
+    let func = instance
+        .get_func(&mut store, "set")
+        .expect("greet export not found");
+    func.call(
+        &mut store,
+        &[
+            Val::String("sample_rate".to_string()),
+            Val::Float32(sample_rate),
+        ],
+        &mut [],
+    )?;
+
+    func.post_return(&mut store)?;
+
     let channels = config.channels as usize;
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);

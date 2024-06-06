@@ -2,17 +2,12 @@
 // Options used:
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub unsafe fn _export_set_sr_cabi<T: Guest>(arg0: f32) {
+pub unsafe fn _export_set_cabi<T: Guest>(arg0: *mut u8, arg1: usize, arg2: f32) {
     #[cfg(target_arch = "wasm32")]
     _rt::run_ctors_once();
-    T::set_sr(arg0);
-}
-#[doc(hidden)]
-#[allow(non_snake_case)]
-pub unsafe fn _export_set_freq_cabi<T: Guest>(arg0: f32) {
-    #[cfg(target_arch = "wasm32")]
-    _rt::run_ctors_once();
-    T::set_freq(arg0);
+    let len0 = arg1;
+    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+    T::set(_rt::string_lift(bytes0), arg2);
 }
 #[doc(hidden)]
 #[allow(non_snake_case)]
@@ -40,8 +35,7 @@ pub unsafe fn __post_return_process<T: Guest>(arg0: *mut u8) {
     _rt::cabi_dealloc(base2, len2 * 4, 4);
 }
 pub trait Guest {
-    fn set_sr(sr: f32);
-    fn set_freq(freq: f32);
+    fn set(key: _rt::String, value: f32);
     fn process(input: _rt::Vec<f32>) -> _rt::Vec<f32>;
 }
 #[doc(hidden)]
@@ -49,13 +43,9 @@ pub trait Guest {
 macro_rules! __export_world_audio_cabi{
   ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
 
-    #[export_name = "set-sr"]
-    unsafe extern "C" fn export_set_sr(arg0: f32,) {
-      $($path_to_types)*::_export_set_sr_cabi::<$ty>(arg0)
-    }
-    #[export_name = "set-freq"]
-    unsafe extern "C" fn export_set_freq(arg0: f32,) {
-      $($path_to_types)*::_export_set_freq_cabi::<$ty>(arg0)
+    #[export_name = "set"]
+    unsafe extern "C" fn export_set(arg0: *mut u8,arg1: usize,arg2: f32,) {
+      $($path_to_types)*::_export_set_cabi::<$ty>(arg0, arg1, arg2)
     }
     #[export_name = "process"]
     unsafe extern "C" fn export_process(arg0: *mut u8,arg1: usize,) -> *mut u8 {
@@ -79,6 +69,14 @@ mod _rt {
         wit_bindgen_rt::run_ctors_once();
     }
     pub use alloc_crate::vec::Vec;
+    pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
+        if cfg!(debug_assertions) {
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::from_utf8_unchecked(bytes)
+        }
+    }
+    pub use alloc_crate::string::String;
     pub unsafe fn cabi_dealloc(ptr: *mut u8, size: usize, align: usize) {
         if size == 0 {
             return;
@@ -121,12 +119,12 @@ pub(crate) use __export_audio_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.25.0:audio:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 224] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07e\x01A\x02\x01A\x07\x01\
-@\x01\x02srv\x01\0\x04\0\x06set-sr\x01\0\x01@\x01\x04freqv\x01\0\x04\0\x08set-fr\
-eq\x01\x01\x01pv\x01@\x01\x05input\x02\0\x02\x04\0\x07process\x01\x03\x04\x01\x13\
-component:sin/audio\x04\0\x0b\x0b\x01\0\x05audio\x03\0\0\0G\x09producers\x01\x0c\
-processed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 205] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07R\x01A\x02\x01A\x05\x01\
+@\x02\x03keys\x05valuev\x01\0\x04\0\x03set\x01\0\x01pv\x01@\x01\x05input\x01\0\x01\
+\x04\0\x07process\x01\x02\x04\x01\x13component:sin/audio\x04\0\x0b\x0b\x01\0\x05\
+audio\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.208.\
+1\x10wit-bindgen-rust\x060.25.0";
 
 #[inline(never)]
 #[doc(hidden)]
