@@ -58,7 +58,10 @@ where
     let wasi_view = ServerWasiView::new();
     let mut store = Store::new(&engine, wasi_view);
 
-    let bytes = std::fs::read("sin.wasm")?;
+    // let bytes = std::fs::read("./wasm-audio-plugin/sin.wasm")?;
+    println!("Loading wasm...");
+    let bytes = std::fs::read("./wasm-audio-plugin/sin-js.wasm")?;
+    println!("Wasm loaded");
     let component = Component::new(&engine, bytes)?;
     let instance = linker.instantiate(&mut store, &component)?;
     let func = instance

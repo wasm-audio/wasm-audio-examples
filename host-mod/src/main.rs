@@ -60,7 +60,7 @@ where
 
     let sample_rate = config.sample_rate.0 as f32;
     let sin_processor = load_wasm(
-        "./sin.wasm",
+        "./wasm-audio-plugin/sin.wasm",
         HashMap::from_iter([
             ("freq", Val::Float32(880.0)),
             ("sample_rate", Val::Float32(sample_rate)),
@@ -123,13 +123,24 @@ where
     for i in 0..50 {
         println!("pushing mul processor no {}", i);
         let mul_processor = load_wasm(
-            "./mul.wasm",
+            "./wasm-audio-plugin/mul.wasm",
             HashMap::from_iter([("factor", Val::Float32(0.95))]),
         )?;
         processors_clone.lock().push(mul_processor);
     }
 
-    // it can hanle 50 processors
+    // it can hanle 50 rust processors
+
+    // but no js processors...
+
+    // for i in 0..10 {
+    //     println!("pushing mul processor no {}", i);
+    //     let mul_processor = load_wasm(
+    //         "./wasm-audio-plugin/mul-js.wasm",
+    //         HashMap::from_iter([("factor", Val::Float32(0.8))]),
+    //     )?;
+    //     processors_clone.lock().push(mul_processor);
+    // }
 
     // make it forever
     std::thread::park();
