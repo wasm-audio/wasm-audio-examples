@@ -8,7 +8,7 @@ lazy_static = "1.4.0"
 parking_lot = "0.12.3"
 wit-bindgen-rt = { version = "0.26.0", features = ["bitflags"] }
 hashbrown = "0.14.5"
-
+atomic_float = "1.0.0"
 [lib]
 crate-type = ["cdylib"]
 
