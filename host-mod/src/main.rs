@@ -62,8 +62,8 @@ where
     let sin_processor = load_wasm(
         "./sin.wasm",
         HashMap::from_iter([
-            ("set-freq", Val::Float32(220.0)),
-            ("set-sr", Val::Float32(sample_rate)),
+            ("freq", Val::Float32(880.0)),
+            ("sample_rate", Val::Float32(sample_rate)),
         ]),
     )?;
     processors.lock().push(sin_processor);
@@ -79,7 +79,6 @@ where
             let max_time = 1.0 / sample_rate * length as f32;
             let start = std::time::Instant::now();
 
-            // let mut input = [Val::List(vec![Val::Float32(0.0); length])];
             let mut result = [Val::List(vec![Val::Float32(0.0); length])];
 
             for processor in processors.lock().iter_mut() {
@@ -108,10 +107,7 @@ where
 
             let elapsed = start.elapsed().as_secs_f32();
             let perc = elapsed / max_time;
-
-            // println!("perc: {}%", perc * 100.0);
-
-            if perc > 1.0 {
+            if perc > 0.7 {
                 println!("perc: {}%", perc * 100.0);
             }
         },
@@ -124,23 +120,16 @@ where
 
     std::thread::sleep(std::time::Duration::from_millis(2000));
 
-    for i in 0..200 {
+    for i in 0..50 {
         println!("pushing mul processor no {}", i);
         let mul_processor = load_wasm(
             "./mul.wasm",
-            HashMap::from_iter([("set-factor", Val::Float32(0.99))]),
+            HashMap::from_iter([("factor", Val::Float32(0.95))]),
         )?;
         processors_clone.lock().push(mul_processor);
     }
 
-    std::thread::sleep(std::time::Duration::from_millis(2000));
-
-    // now we push another sin processor to the end which will ignore the previous mul processors
-    let p = load_wasm(
-        "./sin.wasm",
-        HashMap::from_iter([("set-freq", Val::Float32(219.0))]),
-    )?;
-    processors_clone.lock().push(p);
+    // it can hanle 50 processors
 
     // make it forever
     std::thread::park();
@@ -166,9 +155,10 @@ fn load_wasm(
 
     for (arg_name, arg_val) in args {
         let func = instance
-            .get_func(&mut store, arg_name)
+            .get_func(&mut store, "set")
             .expect("func export not found");
-        func.call(&mut store, &[arg_val], &mut [])?;
+        let arg_key = Val::String(arg_name.to_string());
+        func.call(&mut store, &[arg_key, arg_val], &mut [])?;
         func.post_return(&mut store)?;
     }
 

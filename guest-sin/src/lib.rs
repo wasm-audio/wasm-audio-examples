@@ -16,9 +16,9 @@ impl Guest for Component {
     fn set(key: String, value: f32) {
         match key.as_str() {
             "phase" => set_param!(PHASE, value),
-            "frequency" => set_param!(FREQUENCY, value),
-            "sample_rate" => set_param!(SAMPLE_RATE, value),
-            _ => (),
+            "frequency" | "freq" => set_param!(FREQUENCY, value),
+            "sample_rate" | "sr" => set_param!(SAMPLE_RATE, value),
+            _ => println!("Unknown parameter: {}", key),
         }
     }
 

@@ -3,27 +3,22 @@ mod bindings;
 
 use bindings::Guest;
 
-use lazy_static::lazy_static;
-use parking_lot::Mutex;
+mod prelude;
+use prelude::*;
 
-lazy_static! {
-    static ref FACTOR: Mutex<f32> = Mutex::new(1.0);
-}
+def_param!(FACTOR, 1.0);
 
 struct Component;
 
 impl Guest for Component {
-    fn set_factor(f: f32) {
-        *FACTOR.lock() = f;
+    fn set(key: String, value: f32) {
+        match key.as_str() {
+            "factor" => set_param!(FACTOR, value),
+            _ => (),
+        }
     }
     fn process(input: Vec<f32>) -> Vec<f32> {
-        let mut output = Vec::with_capacity(input.len());
-        // println!("input: {:?}", input);
-        for v in input {
-            let f = *FACTOR.lock();
-            output.push(v * f);
-        }
-        output
+        input.iter().map(|v| v * get_param!(FACTOR)).collect()
     }
 }
 

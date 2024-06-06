@@ -1391,6 +1391,7 @@ dependencies = [
 name = "mul"
 version = "0.1.0"
 dependencies = [
+ "atomic_float",
  "lazy_static",
  "parking_lot",
  "wit-bindgen-rt",
