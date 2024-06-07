@@ -7,6 +7,11 @@ use wasmtime::{
     Config, Engine, Store,
 };
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
+
+const FILE: &str = "./wasm-audio-plugin/sin-opt.wasm";
+// for js, loading takes much longer
+// const FILE: &str = "./wasm-audio-plugin/sin-js-opt.wasm";
+
 fn main() -> anyhow::Result<()> {
     let host = cpal::default_host();
 
@@ -58,18 +63,17 @@ where
     let wasi_view = ServerWasiView::new();
     let mut store = Store::new(&engine, wasi_view);
 
-    // let bytes = std::fs::read("./wasm-audio-plugin/sin.wasm")?;
-    println!("Loading wasm...");
-    let bytes = std::fs::read("./wasm-audio-plugin/sin-js.wasm")?;
-    println!("Wasm loaded");
-    let component = Component::new(&engine, bytes)?;
+    println!("Loading wasm...For JS, it may take more than 60 seconds.");
+    let component = Component::from_file(&engine, FILE)?;
+
+    println!("cmoponent loaded");
     let instance = linker.instantiate(&mut store, &component)?;
     let func = instance
         .get_func(&mut store, "set")
         .expect("greet export not found");
     func.call(
         &mut store,
-        &[Val::String("freq".to_string()), Val::Float32(440.0)],
+        &[Val::String("freq".to_string()), Val::Float32(220.0)],
         &mut [],
     )?;
     func.post_return(&mut store)?;
@@ -94,20 +98,27 @@ where
 
     let err_fn = |err| eprintln!("an error occurred on stream: {}", err);
 
+    let func = instance
+        .get_func(&mut store, "process")
+        .expect("process export not found");
+
     let stream = device.build_output_stream(
         config,
         move |data: &mut [T], _: &cpal::OutputCallbackInfo| {
             let length = data.len() / channels;
 
-            let func = instance
-                .get_func(&mut store, "process")
-                .expect("greet export not found");
-
             let input = [Val::List(vec![Val::Float32(0.0); length])];
             let mut result = [Val::List(vec![Val::Float32(0.0); length])];
 
-            func.call(&mut store, &input, &mut result).unwrap();
-            func.post_return(&mut store).unwrap();
+            match func.call(&mut store, &input, &mut result) {
+                Ok(_) => {
+                    func.post_return(&mut store).unwrap();
+                }
+                Err(e) => {
+                    eprintln!("Error calling process function: {:?}", e);
+                    return;
+                }
+            }
 
             let value = match &result[0] {
                 Val::List(val) => val,
@@ -121,10 +132,6 @@ where
                     _ => panic!("unexpected value {:?}", val),
                 })
                 .collect::<Vec<f32>>();
-
-            // let say result is [T; 512]
-            // data is [T; 1024] when channels is 2
-
             for (i, val) in result.iter().enumerate() {
                 let val = T::from_sample(*val);
                 data[i * channels] = val;
@@ -134,6 +141,7 @@ where
         err_fn,
         None,
     )?;
+
     stream.play()?;
     std::thread::park();
     Ok(())

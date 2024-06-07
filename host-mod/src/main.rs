@@ -131,15 +131,15 @@ where
 
     // it can hanle 50 rust processors
 
-    // but no js processors...
-
-    // for i in 0..10 {
+    // but js processors is much harder to use as hot replacement
+    // for i in 0..3 {
     //     println!("pushing mul processor no {}", i);
     //     let mul_processor = load_wasm(
     //         "./wasm-audio-plugin/mul-js.wasm",
-    //         HashMap::from_iter([("factor", Val::Float32(0.8))]),
+    //         HashMap::from_iter([("factor", Val::Float32(0.5))]),
     //     )?;
     //     processors_clone.lock().push(mul_processor);
+    //     // WARNING: takes very long time to load
     // }
 
     // make it forever
@@ -160,8 +160,9 @@ fn load_wasm(
     let wasi_view = ServerWasiView::new();
     let mut store = Store::new(&engine, wasi_view);
 
-    let bytes = std::fs::read(name)?;
-    let component = Component::new(&engine, bytes)?;
+    // let bytes = std::fs::read(name)?;
+    // let component = Component::new(&engine, bytes)?;
+    let component = Component::from_file(&engine, name)?;
     let instance = linker.instantiate(&mut store, &component)?;
 
     for (arg_name, arg_val) in args {

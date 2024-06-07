@@ -29,7 +29,11 @@ export function process(input) {
   let phase = settings.phase;
   const deltaPhase = frequency / sampleRate;
 
-  console.log(`Processing with frequency: ${frequency}, sample rate: ${sampleRate}, initial phase: ${phase}`);
+  // FIXME: input is sometimes an empty array, which causes the following error
+  // if (!Array.isArray(input) || input.length === 0) {
+  //   console.error('Invalid input array');
+  //   return [];
+  // }
 
   const output = input.map((_, index) => {
     phase += deltaPhase;
@@ -37,15 +41,22 @@ export function process(input) {
       phase -= 1.0;
     }
     const value = Math.sin(phase * 2.0 * Math.PI);
-    if (index < 10) { // 仅打印前10个值
-      console.log(`output[${index}] = ${value}`);
-    }
     return value;
   });
 
-  settings.phase = phase;
+  // let length = input.length ? input.length : 512;
 
-  console.log(`Final phase: ${phase}`);
+  // const output = [];
+  // for (let i = 0; i < length; i++) {
+  //   phase += deltaPhase;
+  //   if (phase > 1.0) {
+  //     phase -= 1.0;
+  //   }
+  //   const value = Math.sin(phase * 2.0 * Math.PI);
+  //   output.push(value);
+  // }
+
+  settings.phase = phase;
 
   return output;
 }
