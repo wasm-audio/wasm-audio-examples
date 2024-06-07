@@ -9,8 +9,8 @@ use wasmtime::{
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
 const FILE: &str = "./wasm-audio-plugin/sin-opt.wasm";
-// for js, loading takes much longer
-// const FILE: &str = "./wasm-audio-plugin/sin-js-opt.wasm";
+// for js, loading takes much longer and will distort after a while
+// const FILE: &str = "./wasm-audio-plugin/sin-js.wasm";
 
 fn main() -> anyhow::Result<()> {
     let host = cpal::default_host();
@@ -66,7 +66,7 @@ where
     println!("Loading wasm...For JS, it may take more than 60 seconds.");
     let component = Component::from_file(&engine, FILE)?;
 
-    println!("cmoponent loaded");
+    println!("component loaded");
     let instance = linker.instantiate(&mut store, &component)?;
     let func = instance
         .get_func(&mut store, "set")

@@ -23,6 +23,15 @@ export function set(key, value) {
   console.log(`Set ${key} to ${value}`);
 }
 
+export function getParams() {
+  return [{
+    name: "frequency",
+    min: 20,
+    max: 20000,
+    default: 440,
+  }]
+}
+
 export function process(input) {
   const frequency = settings.frequency;
   const sampleRate = settings.sample_rate;
@@ -43,18 +52,6 @@ export function process(input) {
     const value = Math.sin(phase * 2.0 * Math.PI);
     return value;
   });
-
-  // let length = input.length ? input.length : 512;
-
-  // const output = [];
-  // for (let i = 0; i < length; i++) {
-  //   phase += deltaPhase;
-  //   if (phase > 1.0) {
-  //     phase -= 1.0;
-  //   }
-  //   const value = Math.sin(phase * 2.0 * Math.PI);
-  //   output.push(value);
-  // }
 
   settings.phase = phase;
 

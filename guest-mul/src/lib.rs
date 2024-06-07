@@ -1,12 +1,12 @@
 #[allow(warnings)]
 mod bindings;
 
+use crate::bindings::ParamInfo;
 use bindings::Guest;
-
 mod prelude;
 use prelude::*;
 
-def_param!(FACTOR, 1.0);
+init_param!(FACTOR, 1.0);
 
 struct Component;
 
@@ -16,6 +16,14 @@ impl Guest for Component {
             "factor" => set_param!(FACTOR, value),
             _ => (),
         }
+    }
+    fn get_params() -> Vec<ParamInfo> {
+        return vec![ParamInfo {
+            name: "factor".to_string(),
+            min: 0.0,
+            max: 1.0,
+            default: 1.0,
+        }];
     }
     fn process(input: Vec<f32>) -> Vec<f32> {
         input.iter().map(|v| v * get_param!(FACTOR)).collect()

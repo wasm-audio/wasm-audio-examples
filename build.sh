@@ -1,20 +1,14 @@
-cd guest-mul && cargo component build -r
+cargo component build -r -p guest-mul
 
-cd ..
+cp target/wasm32-wasi/release/guest_mul.wasm ./wasm-audio-plugin
 
-cp target/wasm32-wasi/release/mul.wasm ./wasm-audio-plugin
+cargo component build -r -p guest-sin
 
-cd guest-sin && cargo component build -r
+cp target/wasm32-wasi/release/guest_sin.wasm ./wasm-audio-plugin
 
-cd ..
+cargo component build -r -p guest-techno
 
-cp target/wasm32-wasi/release/sin.wasm ./wasm-audio-plugin
-
-cd guest-techno && cargo component build -r
-
-cd ..
-
-cp target/wasm32-wasi/release/techno.wasm ./wasm-audio-plugin
+cp target/wasm32-wasi/release/guest_techno.wasm ./wasm-audio-plugin
 
 # jco componentize ./guest-mul/mul.js --wit ./guest-mul/wit/world.wit -o ./wasm-audio-plugin/mul-js.wasm
 
@@ -25,6 +19,6 @@ cd wasm-audio-plugin
 
 # jco opt sin-js.wasm -o sin-js-opt.wasm
 # jco opt mul-js.wasm -o mul-js-opt.wasm
-jco opt mul.wasm -o mul-opt.wasm
-jco opt sin.wasm -o sin-opt.wasm
-jco opt techno.wasm -o techno-opt.wasm
+jco opt guest_mul.wasm -o mul-opt.wasm
+jco opt guest_sin.wasm -o sin-opt.wasm
+jco opt guest_techno.wasm -o techno-opt.wasm

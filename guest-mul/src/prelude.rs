@@ -3,7 +3,7 @@ pub use lazy_static::lazy_static;
 pub use std::sync::atomic::Ordering;
 
 #[macro_export]
-macro_rules! def_param {
+macro_rules! init_param {
     ($name:ident, $value:expr) => {
         lazy_static! {
             static ref $name: AtomicF32 = AtomicF32::new($value);

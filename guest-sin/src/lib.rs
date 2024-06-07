@@ -5,10 +5,12 @@ use prelude::*;
 mod bindings;
 
 use bindings::Guest;
+use bindings::ParamInfo;
 
-def_param!(PHASE, 0.0);
-def_param!(FREQUENCY, 440.0);
-def_param!(SAMPLE_RATE, 48000.0);
+init_param!(PHASE, 0.0);
+init_param!(FREQUENCY, 440.0);
+init_param!(SAMPLE_RATE, 48000.0);
+init_param!(AMPLITUDE, 1.0);
 
 pub struct Component;
 
@@ -18,8 +20,26 @@ impl Guest for Component {
             "phase" => set_param!(PHASE, value),
             "frequency" | "freq" => set_param!(FREQUENCY, value),
             "sample_rate" | "sr" => set_param!(SAMPLE_RATE, value),
+            "amplitude" | "amp" => set_param!(AMPLITUDE, value),
             _ => println!("Unknown parameter: {}", key),
         }
+    }
+
+    fn get_params() -> Vec<ParamInfo> {
+        return vec![
+            ParamInfo {
+                name: "frequency".to_string(),
+                min: 20.0,
+                max: 20000.0,
+                default: 440.0,
+            },
+            ParamInfo {
+                name: "amplitude".to_string(),
+                min: 0.0,
+                max: 1.0,
+                default: 1.0,
+            },
+        ];
     }
 
     fn process(input: Vec<f32>) -> Vec<f32> {
@@ -34,7 +54,7 @@ impl Guest for Component {
             if phase > 1.0 {
                 phase -= 1.0;
             }
-            output.push((phase * 2.0 * std::f32::consts::PI).sin());
+            output.push((phase * 2.0 * std::f32::consts::PI).sin() * get_param!(AMPLITUDE));
         }
 
         set_param!(PHASE, phase);
