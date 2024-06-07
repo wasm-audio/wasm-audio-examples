@@ -1,5 +1,5 @@
 [package]
-name = "host-mod"
+name = "host-stress"
 version = "0.1.0"
 edition = "2021"
 

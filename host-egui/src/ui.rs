@@ -16,7 +16,7 @@ use cpal::{
 pub struct EguiApp {
     dropped_files: Vec<egui::DroppedFile>,
     instances: Arc<Mutex<Vec<(Store<ServerWasiView>, Instance)>>>,
-    infos: Arc<Mutex<Vec<Vec<ParamInfo>>>>,
+    infos: Arc<Mutex<Vec<(Vec<ParamInfo>, String)>>>,
 }
 
 pub struct ParamInfo {
@@ -83,8 +83,10 @@ impl eframe::App for EguiApp {
                 for file in &i.raw.dropped_files {
                     println!("Dropped file: {:?}", file);
                     if let Some(path) = &file.path {
-                        let (mut store, instance) = match load_instance(&path.display().to_string())
-                        {
+                        let s = path.display().to_string();
+                        let file_name_with_extension =
+                            path.file_name().unwrap().to_str().unwrap().to_string();
+                        let (mut store, instance) = match load_instance(&s) {
                             Ok((s, i)) => (s, i),
                             Err(e) => {
                                 eprintln!("Failed to load instance: {:?}", e);
@@ -133,7 +135,7 @@ impl eframe::App for EguiApp {
                                         _ => panic!("unexpected param info"),
                                     }
                                 }
-                                self.infos.lock().push(info);
+                                self.infos.lock().push((info, file_name_with_extension));
                             }
                             _ => panic!("unexpected return value"),
                         };
@@ -149,14 +151,14 @@ impl eframe::App for EguiApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            if ui.button("Click me!").clicked() {
-                println!("Button clicked!");
-            }
-            ui.label("Drag and drop wasm audio plugin here:");
+            ui.heading("Warning! Lower the volume before playing audio.");
+            ui.heading("Drag and drop wasm audio plugin here:");
             if !self.infos.lock().is_empty() {
                 for (i, info) in self.infos.lock().iter_mut().enumerate() {
                     ui.group(|ui| {
-                        for info in info.iter_mut() {
+                        ui.label(&info.1);
+                        ui.separator();
+                        for info in info.0.iter_mut() {
                             ui.label(&info.name);
                             let response =
                                 ui.add(egui::Slider::new(&mut info.value, info.min..=info.max));

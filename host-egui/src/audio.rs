@@ -2,8 +2,8 @@ use parking_lot::Mutex;
 use std::sync::Arc;
 
 use cpal::{
-    traits::{DeviceTrait, HostTrait, StreamTrait},
-    FromSample, SizedSample, SupportedStreamConfig,
+    traits::{DeviceTrait, StreamTrait},
+    FromSample, SizedSample,
 };
 use wasmtime::{
     component::{Component, Instance, Linker, Val},
@@ -173,20 +173,6 @@ pub fn load_wasm(
             result[0].clone()
         }
     };
-
-    // let params_getter = {
-    //     let store = Arc::clone(&store);
-    //     let func = Arc::clone(&func);
-
-    //     move |input: Val| -> Val {
-    //         let mut store = store.lock();
-    //         let func = func.lock();
-    //         let mut result = [Val::List(vec![Val::Float32(0.0); 1024])];
-    //         func.call(&mut *store, &[input], &mut result).unwrap();
-    //         func.post_return(&mut *store).unwrap();
-    //         result[0].clone()
-    //     }
-    // };
 
     Ok(Arc::new(Mutex::new(processor)))
 }

@@ -1,3 +1,7 @@
+# wasm-audio-example
+
+> WIP
+
 ensure you have Rust installed:
 
 https://www.rust-lang.org/tools/install
@@ -11,4 +15,4 @@ Then try run the following commands in the root of the project:
 
 1. `./build.sh`
 2. `cargo run` this will run the basic example
-3. `./run-host-mod.sh` this will show how to dynamically load an audio wasm module
+3. `cargo run -p host-egui` this will run the egui example

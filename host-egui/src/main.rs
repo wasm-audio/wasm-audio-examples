@@ -7,7 +7,7 @@ fn main() -> anyhow::Result<()> {
         ..Default::default()
     };
     eframe::run_native(
-        "eframe template",
+        "wasm audio host egui example",
         native_options,
         Box::new(|cc| Box::new(host_egui::EguiApp::new(cc))),
     )

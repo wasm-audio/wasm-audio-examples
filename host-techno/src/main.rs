@@ -1,6 +1,6 @@
 use cpal::{
     traits::{DeviceTrait, HostTrait, StreamTrait},
-    FromSample, Sample, SizedSample, SupportedOutputConfigs, SupportedStreamConfig,
+    FromSample, SizedSample, SupportedStreamConfig,
 };
 use wasmtime::{
     component::{Component, Linker, Val},
@@ -78,7 +78,7 @@ where
     let wasi_view = ServerWasiView::new();
     let mut store = Store::new(&engine, wasi_view);
 
-    let bytes = std::fs::read("techno.wasm")?;
+    let bytes = std::fs::read("./wasm-audio-plugin/techno-opt.wasm")?;
     let component = Component::new(&engine, bytes)?;
     let instance = linker.instantiate(&mut store, &component)?;
     let func = instance
@@ -89,9 +89,13 @@ where
 
     let sample_rate = config.sample_rate.0 as f32;
     let func = instance
-        .get_func(&mut store, "set-sr")
+        .get_func(&mut store, "set")
         .expect("greet export not found");
-    func.call(&mut store, &[Val::Float32(sample_rate)], &mut [])?;
+    func.call(
+        &mut store,
+        &[Val::String("sr".into()), Val::Float32(sample_rate)],
+        &mut [],
+    )?;
     func.post_return(&mut store)?;
     let channels = config.channels as usize;
 
@@ -132,9 +136,9 @@ where
                 data[i * channels + 1] = val;
             }
             let elapsed = start.elapsed().as_secs_f32();
-            let perc = elapsed / max_time;
+            let _perc = elapsed / max_time;
 
-            println!("perc: {}%", perc * 100.0);
+            // println!("perc: {}%", perc * 100.0);
         },
         err_fn,
         None,
