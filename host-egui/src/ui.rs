@@ -81,7 +81,6 @@ impl eframe::App for EguiApp {
         ctx.input(|i| {
             if !i.raw.dropped_files.is_empty() {
                 for file in &i.raw.dropped_files {
-                    println!("Dropped file: {:?}", file);
                     if let Some(path) = &file.path {
                         let s = path.display().to_string();
                         let file_name_with_extension =
@@ -118,7 +117,6 @@ impl eframe::App for EguiApp {
                             Val::List(param_infos) => {
                                 let mut info = vec![];
                                 for param_info in param_infos {
-                                    println!("{:?}", param_info);
                                     match param_info {
                                         Val::Record(params) => {
                                             let name = get_val_string(params[0].1.clone());
@@ -151,8 +149,8 @@ impl eframe::App for EguiApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Warning! Lower the volume before playing audio.");
-            ui.heading("Drag and drop wasm audio plugin here:");
+            ui.label("Warning! Lower the volume before playing audio.");
+            ui.label("Drag and drop wasm audio plugin here:");
             if !self.infos.lock().is_empty() {
                 for (i, info) in self.infos.lock().iter_mut().enumerate() {
                     ui.group(|ui| {

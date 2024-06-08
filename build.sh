@@ -14,7 +14,6 @@ cp target/wasm32-wasi/release/guest_techno.wasm ./wasm-audio-plugin
 
 # jco componentize ./guest-sin/sin.js --wit ./guest-sin/wit/world.wit -o ./wasm-audio-plugin/sin-js.wasm
 
-
 cd wasm-audio-plugin
 
 # jco opt sin-js.wasm -o sin-js-opt.wasm
