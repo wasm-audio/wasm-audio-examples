@@ -1,0 +1,13 @@
+package component:sin;
+
+world audio {
+     record param-info {
+        name: string,
+        min: f32,
+        max: f32,
+        default: f32,
+    }
+    export get-params: func() -> list<param-info>;
+    export set: func(key: string, value: f32);
+    export process: func(input: list<f32>) -> list<f32>;
+}

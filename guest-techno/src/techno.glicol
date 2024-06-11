@@ -11,7 +11,7 @@
 ~t1: mix ~osc.. >> lpf 300.0 0.33 >> mul ~env
 >> mul $t1_amp
 
-o: mix ~t.. >> mul 1 >> plate $reverb_mix
+o: mix ~t..
 
 ~t2: speed 4.0 >> seq _ 60 >> bd 0.2 >> mul $t2_amp
 

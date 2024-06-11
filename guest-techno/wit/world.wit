@@ -9,6 +9,5 @@ world audio {
     }
     export get-params: func() -> list<param-info>;
     export set: func(key: string, value: f32);
-    export set-code: func(code: string);
     export process: func(input: list<f32>) -> list<f32>;
 }

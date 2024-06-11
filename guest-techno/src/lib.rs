@@ -15,7 +15,6 @@ use prelude::*;
 init_param!(T1_AMP, 1.0);
 init_param!(T2_AMP, 0.6);
 init_param!(T3_AMP, 0.05);
-init_param!(REVERB_MIX, 0.2);
 init_param!(BPM, 120.0);
 
 lazy_static! {
@@ -28,8 +27,7 @@ lazy_static! {
                 .unwrap()
                 .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
                 .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-                .replace("$reverb_mix", get_param!(REVERB_MIX).to_string().as_str()),
+                .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
         );
         engine.set_sr(48000);
         engine.livecoding = false;
@@ -53,8 +51,7 @@ impl Guest for Component {
                         .unwrap()
                         .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
                         .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-                        .replace("$reverb_mix", get_param!(REVERB_MIX).to_string().as_str()),
+                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
                 );
             }
             "t2_amp" => {
@@ -64,8 +61,7 @@ impl Guest for Component {
                     .unwrap()
                     .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
                     .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                    .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-                    .replace("$reverb_mix", get_param!(REVERB_MIX).to_string().as_str());
+                    .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str());
                 engine.update_with_code(&code);
             }
             "t3_amp" => {
@@ -76,29 +72,12 @@ impl Guest for Component {
                         .unwrap()
                         .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
                         .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-                        .replace("$reverb_mix", get_param!(REVERB_MIX).to_string().as_str()),
+                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
                 );
             }
-            "reverb_mix" => {
-                set_param!(REVERB_MIX, value);
-                engine.update_with_code(
-                    &CODE
-                        .lock()
-                        .unwrap()
-                        .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-                        .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-                        .replace("$reverb_mix", get_param!(REVERB_MIX).to_string().as_str()),
-                );
-            }
+
             _ => (),
         }
-    }
-
-    fn set_code(code: String) {
-        let mut engine = ENGINE.lock().unwrap();
-        engine.update_with_code(&code);
     }
 
     fn get_params() -> Vec<ParamInfo> {
@@ -126,12 +105,6 @@ impl Guest for Component {
                 min: 0.0,
                 max: 1.0,
                 default: 0.05,
-            },
-            ParamInfo {
-                name: "reverb_mix".into(),
-                min: 0.0,
-                max: 1.0,
-                default: 0.2,
             },
         ]
     }
