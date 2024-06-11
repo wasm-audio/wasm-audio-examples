@@ -37,24 +37,15 @@ lazy_static! {
     });
 }
 
-#[macro_export]
-macro_rules! update_engine {
-    (
-        $engine:ident
-    ) => {
-        $engine.update_with_code(
-            &CODE
-                .lock()
-                .unwrap()
-                .replace("#bandwidth", get_param!(BANDWIDTH).to_string().as_str())
-                .replace("#damping", get_param!(DAMPING).to_string().as_str())
-                .replace("#decay", get_param!(DAMPING).to_string().as_str())
-                .replace("#wetmix", get_param!(MIX).to_string().as_str())
-                .replace("#drymix", (1.0 - get_param!(MIX)).to_string().as_str()),
-        );
-    };
+fn make_code() -> String {
+    CODE.lock()
+        .unwrap()
+        .replace("#bandwidth", get_param!(BANDWIDTH).to_string().as_str())
+        .replace("#damping", get_param!(DAMPING).to_string().as_str())
+        .replace("#decay", get_param!(DAMPING).to_string().as_str())
+        .replace("#wetmix", get_param!(MIX).to_string().as_str())
+        .replace("#drymix", (1.0 - get_param!(MIX)).to_string().as_str())
 }
-
 struct Component;
 
 impl Guest for Component {
@@ -64,19 +55,19 @@ impl Guest for Component {
             "sample_rate" | "sr" => engine.set_sr(value as usize),
             "bandwidth" => {
                 set_param!(BANDWIDTH, value);
-                update_engine!(engine);
+                engine.update_with_code(&make_code());
             }
             "damping" => {
                 set_param!(DAMPING, value);
-                update_engine!(engine);
+                engine.update_with_code(&make_code());
             }
             "decay" => {
                 set_param!(DECAY, value);
-                update_engine!(engine);
+                engine.update_with_code(&make_code());
             }
             "mix" => {
                 set_param!(MIX, value);
-                update_engine!(engine);
+                engine.update_with_code(&make_code());
             }
             _ => (),
         }

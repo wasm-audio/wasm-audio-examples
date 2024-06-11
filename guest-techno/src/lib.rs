@@ -21,18 +21,20 @@ lazy_static! {
     static ref CODE: Mutex<String> = Mutex::new(include_str!("techno.glicol").into());
     static ref ENGINE: Mutex<Engine<128>> = Mutex::new({
         let mut engine = Engine::new();
-        engine.update_with_code(
-            &CODE
-                .lock()
-                .unwrap()
-                .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-                .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
-        );
+        let code = update_code();
+        engine.update_with_code(&code);
         engine.set_sr(48000);
         engine.livecoding = false;
         engine
     });
+}
+
+fn update_code() -> String {
+    CODE.lock()
+        .unwrap()
+        .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
+        .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
+        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
 }
 
 struct Component;
@@ -45,37 +47,19 @@ impl Guest for Component {
             "bpm" => engine.set_bpm(value),
             "t1_amp" => {
                 set_param!(T1_AMP, value);
-                engine.update_with_code(
-                    &CODE
-                        .lock()
-                        .unwrap()
-                        .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-                        .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
-                );
+                let code = update_code();
+                engine.update_with_code(&code);
             }
             "t2_amp" => {
                 set_param!(T2_AMP, value);
-                let code = CODE
-                    .lock()
-                    .unwrap()
-                    .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-                    .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                    .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str());
+                let code = update_code();
                 engine.update_with_code(&code);
             }
             "t3_amp" => {
                 set_param!(T3_AMP, value);
-                engine.update_with_code(
-                    &CODE
-                        .lock()
-                        .unwrap()
-                        .replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-                        .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-                        .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str()),
-                );
+                let code = update_code();
+                engine.update_with_code(&code);
             }
-
             _ => (),
         }
     }
