@@ -2044,10 +2044,7 @@ dependencies = [
 name = "guest-techno"
 version = "0.1.0"
 dependencies = [
- "atomic_float",
  "glicol",
- "lazy_static",
- "parking_lot",
  "wit-bindgen-rt",
 ]
 
