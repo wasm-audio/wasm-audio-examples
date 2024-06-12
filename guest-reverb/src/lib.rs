@@ -10,18 +10,15 @@ init_param!(BANDWIDTH, f32, 0.7);
 init_param!(DAMPING, f32, 0.1);
 init_param!(DECAY, f32, 0.3);
 init_param!(MIX, f32, 0.1);
-
-thread_local! {
-    static CODE: RefCell<String> = RefCell::new(include_str!("reverb.glicol").into());
-    static ENGINE: RefCell<Engine<128>> = RefCell::new({
-        let mut engine = Engine::new();
-        let code = make_code();
-        engine.update_with_code(&code);
-        engine.set_sr(48000);
-        engine.livecoding = false;
-        engine
-    });
-}
+init_param!(CODE, String, include_str!("reverb.glicol").into());
+init_param!(ENGINE, Engine<128>, {
+    let mut engine = Engine::<128>::new();
+    let code = make_code();
+    engine.update_with_code(&code);
+    engine.set_sr(48000);
+    engine.livecoding = false;
+    engine
+});
 
 fn make_code() -> String {
     CODE.with(|code| {
