@@ -11,22 +11,6 @@ use wasmtime::{
 };
 use wasmtime_wasi::{ResourceTable, WasiCtx, WasiCtxBuilder, WasiView};
 
-use hashbrown::HashMap;
-
-pub type Processors = Arc<
-    parking_lot::lock_api::Mutex<
-        parking_lot::RawMutex,
-        Vec<
-            Arc<
-                parking_lot::lock_api::Mutex<
-                    parking_lot::RawMutex,
-                    dyn FnMut(Val) -> Val + Send + Sync,
-                >,
-            >,
-        >,
-    >,
->;
-
 pub fn run<T>(
     device: &cpal::Device,
     config: &cpal::StreamConfig,
@@ -36,9 +20,6 @@ pub fn run<T>(
 where
     T: SizedSample + FromSample<f32>,
 {
-    // let processors = Arc::new(Mutex::new(vec![]));
-    // let processors_clone = Arc::clone(&processors);
-
     let sample_rate = config.sample_rate.0 as f32;
 
     let channels = config.channels as usize;
@@ -124,57 +105,6 @@ pub fn load_instance(file_path: &str) -> anyhow::Result<(Store<ServerWasiView>, 
     let instance = linker.instantiate(&mut store, &component)?;
 
     Ok((store, instance))
-}
-
-pub fn load_wasm(
-    file_path: &str,
-    args: HashMap<&str, Val>,
-) -> anyhow::Result<Arc<Mutex<dyn FnMut(Val) -> Val + Send + Sync>>> {
-    let mut wasm_config = Config::default();
-    wasm_config.wasm_component_model(true);
-    let engine = Engine::new(&wasm_config)?;
-    let mut linker = Linker::new(&engine);
-    wasmtime_wasi::add_to_linker_sync(&mut linker).expect("Failed to link command world");
-
-    let wasi_view = ServerWasiView::new();
-    let mut store = Store::new(&engine, wasi_view);
-
-    // let bytes = std::fs::read(name)?;
-    // let component = Component::new(&engine, bytes)?;
-    let component = Component::from_file(&engine, file_path)?;
-    let instance = linker.instantiate(&mut store, &component)?;
-
-    for (arg_name, arg_val) in args {
-        let func = instance
-            .get_func(&mut store, "set")
-            .expect("func export not found");
-        let arg_key = Val::String(arg_name.to_string());
-        func.call(&mut store, &[arg_key, arg_val], &mut [])?;
-        func.post_return(&mut store)?;
-    }
-
-    let func = instance
-        .get_func(&mut store, "process")
-        .expect("func export not found");
-
-    let store = Arc::new(Mutex::new(store));
-    let func = Arc::new(Mutex::new(func));
-
-    let processor = {
-        let store = Arc::clone(&store);
-        let func = Arc::clone(&func);
-
-        move |input: Val| -> Val {
-            let mut store = store.lock();
-            let func = func.lock();
-            let mut result = [Val::List(vec![Val::Float32(0.0); 1024])];
-            func.call(&mut *store, &[input], &mut result).unwrap();
-            func.post_return(&mut *store).unwrap();
-            result[0].clone()
-        }
-    };
-
-    Ok(Arc::new(Mutex::new(processor)))
 }
 
 pub struct ServerWasiView {

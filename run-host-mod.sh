@@ -1,1 +1,0 @@
-cargo run -r -p host-mod

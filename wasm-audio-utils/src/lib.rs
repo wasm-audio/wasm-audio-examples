@@ -22,3 +22,31 @@ macro_rules! get_param {
         $name.with(|param| param.get())
     };
 }
+
+pub use std::cell::RefCell;
+
+#[macro_export]
+macro_rules! init_param_refcell {
+    ($name:ident, $ty:ty, $init:expr) => {
+        thread_local! {
+            pub static $name: RefCell<$ty> = RefCell::new($init);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! set_param_refcell {
+    ($name:ident, $value:expr) => {
+        $name.with(|param| {
+            let mut param = param.borrow_mut();
+            *param = $value;
+        })
+    };
+}
+
+#[macro_export]
+macro_rules! get_param_refcell {
+    ($name:ident) => {
+        $name.with(|param| param.borrow().clone())
+    };
+}

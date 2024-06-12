@@ -2,34 +2,28 @@
 mod bindings;
 use bindings::*;
 use glicol::Engine;
-use std::cell::RefCell;
-
 use wasm_audio_utils::*;
 
-init_param!(T1_AMP, 1.0);
-init_param!(T2_AMP, 0.6);
-init_param!(T3_AMP, 0.05);
-init_param!(BPM, 120.0);
+init_param_refcell!(T1_AMP, f32, 1.0);
+init_param_refcell!(T2_AMP, f32, 0.6);
+init_param_refcell!(T3_AMP, f32, 0.05);
+init_param_refcell!(BPM, f32, 120.0);
 
-thread_local! {
-    static CODE: RefCell<String> = RefCell::new(include_str!("techno.glicol").into());
-    static ENGINE: RefCell<Engine<128>> = RefCell::new({
-        let mut engine = Engine::new();
-        let code = make_code();
-        engine.update_with_code(&code);
-        engine.set_sr(48000);
-        engine.livecoding = false;
-        engine
-    });
-}
+init_param_refcell!(CODE, String, include_str!("techno.glicol").into());
+init_param_refcell!(ENGINE, Engine<128>, {
+    let mut engine = Engine::<128>::new();
+    let code = make_code();
+    engine.update_with_code(&code);
+    engine.set_sr(48000);
+    engine.livecoding = false;
+    engine
+});
 
 fn make_code() -> String {
-    CODE.with(|code| {
-        let code = code.borrow();
-        code.replace("$t1_amp", get_param!(T1_AMP).to_string().as_str())
-            .replace("$t2_amp", get_param!(T2_AMP).to_string().as_str())
-            .replace("$t3_amp", get_param!(T3_AMP).to_string().as_str())
-    })
+    get_param_refcell!(CODE)
+        .replace("$T1_AMP", &get_param_refcell!(T1_AMP).to_string())
+        .replace("$T2_AMP", &get_param_refcell!(T2_AMP).to_string())
+        .replace("$T3_AMP", &get_param_refcell!(T3_AMP).to_string())
 }
 
 struct Component;
@@ -42,17 +36,17 @@ impl Guest for Component {
                 "sample_rate" | "sr" => engine.set_sr(value as usize),
                 "bpm" => engine.set_bpm(value),
                 "t1_amp" => {
-                    set_param!(T1_AMP, value);
+                    set_param_refcell!(T1_AMP, value);
                     let code = make_code();
                     engine.update_with_code(&code);
                 }
                 "t2_amp" => {
-                    set_param!(T2_AMP, value);
+                    set_param_refcell!(T2_AMP, value);
                     let code = make_code();
                     engine.update_with_code(&code);
                 }
                 "t3_amp" => {
-                    set_param!(T3_AMP, value);
+                    set_param_refcell!(T3_AMP, value);
                     let code = make_code();
                     engine.update_with_code(&code);
                 }
