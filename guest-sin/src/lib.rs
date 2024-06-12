@@ -6,10 +6,10 @@ use bindings::ParamInfo;
 
 use wasm_audio_utils::*;
 
-init_param!(PHASE, 0.0);
-init_param!(FREQUENCY, 440.0);
-init_param!(SAMPLE_RATE, 48000.0);
-init_param!(AMPLITUDE, 1.0);
+init_param!(PHASE, f32, 0.0);
+init_param!(FREQUENCY, f32, 440.0);
+init_param!(SAMPLE_RATE, f32, 48000.0);
+init_param!(AMPLITUDE, f32, 1.0);
 
 pub struct Component;
 

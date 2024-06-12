@@ -6,10 +6,10 @@ use glicol::Engine;
 use std::cell::RefCell;
 use wasm_audio_utils::*;
 
-init_param!(BANDWIDTH, 0.7);
-init_param!(DAMPING, 0.1);
-init_param!(DECAY, 0.3);
-init_param!(MIX, 0.1);
+init_param!(BANDWIDTH, f32, 0.7);
+init_param!(DAMPING, f32, 0.1);
+init_param!(DECAY, f32, 0.3);
+init_param!(MIX, f32, 0.1);
 
 thread_local! {
     static CODE: RefCell<String> = RefCell::new(include_str!("reverb.glicol").into());
@@ -26,11 +26,11 @@ thread_local! {
 fn make_code() -> String {
     CODE.with(|code| {
         let code = code.borrow();
-        code.replace("#bandwidth", get_param!(BANDWIDTH).to_string().as_str())
-            .replace("#damping", get_param!(DAMPING).to_string().as_str())
-            .replace("#decay", get_param!(DECAY).to_string().as_str())
-            .replace("#wetmix", get_param!(MIX).to_string().as_str())
-            .replace("#drymix", (1.0 - get_param!(MIX)).to_string().as_str())
+        code.replace("#bandwidth", &get_param!(BANDWIDTH).to_string())
+            .replace("#damping", &get_param!(DAMPING).to_string())
+            .replace("#decay", &get_param!(DECAY).to_string())
+            .replace("#wetmix", &get_param!(MIX).to_string())
+            .replace("#drymix", &(1.0 - get_param!(MIX)).to_string())
     })
 }
 

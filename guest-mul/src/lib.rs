@@ -5,7 +5,7 @@ use crate::bindings::ParamInfo;
 use bindings::Guest;
 use wasm_audio_utils::*;
 
-init_param!(FACTOR, 1.0);
+init_param!(FACTOR, f32, 1.0);
 
 struct Component;
 
