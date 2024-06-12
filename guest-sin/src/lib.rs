@@ -1,11 +1,10 @@
-mod prelude;
-use prelude::*;
-
 #[allow(warnings)]
 mod bindings;
 
 use bindings::Guest;
 use bindings::ParamInfo;
+
+use wasm_audio_utils::*;
 
 init_param!(PHASE, 0.0);
 init_param!(FREQUENCY, 440.0);

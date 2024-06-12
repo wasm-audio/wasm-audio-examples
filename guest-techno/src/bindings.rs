@@ -228,14 +228,14 @@ pub(crate) use __export_audio_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.25.0:audio:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 273] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x95\x01\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 276] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x98\x01\x01A\x02\x01\
 A\x0a\x01r\x04\x04names\x03minv\x03maxv\x07defaultv\x03\0\x0aparam-info\x03\0\0\x01\
 p\x01\x01@\0\0\x02\x04\0\x0aget-params\x01\x03\x01@\x02\x03keys\x05valuev\x01\0\x04\
 \0\x03set\x01\x04\x01pv\x01@\x01\x05input\x05\0\x05\x04\0\x07process\x01\x06\x04\
-\x01\x13component:sin/audio\x04\0\x0b\x0b\x01\0\x05audio\x03\0\0\0G\x09producers\
-\x01\x0cprocessed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25\
-.0";
+\x01\x16component:techno/audio\x04\0\x0b\x0b\x01\0\x05audio\x03\0\0\0G\x09produc\
+ers\x01\x0cprocessed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060\
+.25.0";
 
 #[inline(never)]
 #[doc(hidden)]

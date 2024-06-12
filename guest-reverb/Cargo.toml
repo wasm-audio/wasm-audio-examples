@@ -4,11 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lazy_static = "1.4.0"
-parking_lot = "0.12.3"
+
 wit-bindgen-rt = { version = "0.26.0", features = ["bitflags"] }
 glicol = "0.13.5"
-atomic_float = "1.0.0"
+wasm-audio-utils = { workspace = true }
 
 [lib]
 crate-type = ["cdylib"]
@@ -21,6 +20,6 @@ strip = true
 lto = true
 
 [package.metadata.component]
-package = "component:techno"
+package = "component:reverb"
 
 [package.metadata.component.dependencies]

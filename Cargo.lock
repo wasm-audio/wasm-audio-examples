@@ -426,12 +426,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
-name = "atomic_float"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c4b08ed8a30ff7320117c190eb4d73d47f0ac0c930ab853b8224cef7cd9a5e7"
-
-[[package]]
 name = "atspi"
 version = "0.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2012,9 +2006,7 @@ dependencies = [
 name = "guest-mul"
 version = "0.1.0"
 dependencies = [
- "atomic_float",
- "lazy_static",
- "parking_lot",
+ "wasm-audio-utils",
  "wit-bindgen-rt",
 ]
 
@@ -2022,10 +2014,8 @@ dependencies = [
 name = "guest-reverb"
 version = "0.1.0"
 dependencies = [
- "atomic_float",
  "glicol",
- "lazy_static",
- "parking_lot",
+ "wasm-audio-utils",
  "wit-bindgen-rt",
 ]
 
@@ -2033,10 +2023,7 @@ dependencies = [
 name = "guest-sin"
 version = "0.1.0"
 dependencies = [
- "atomic_float",
- "hashbrown 0.14.5",
- "lazy_static",
- "parking_lot",
+ "wasm-audio-utils",
  "wit-bindgen-rt",
 ]
 
@@ -2045,6 +2032,7 @@ name = "guest-techno"
 version = "0.1.0"
 dependencies = [
  "glicol",
+ "wasm-audio-utils",
  "wit-bindgen-rt",
 ]
 
@@ -3905,6 +3893,10 @@ name = "wasi"
 version = "0.11.0+wasi-snapshot-preview1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
+
+[[package]]
+name = "wasm-audio-utils"
+version = "0.1.0"
 
 [[package]]
 name = "wasm-bindgen"

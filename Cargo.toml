@@ -1,9 +1,22 @@
 [workspace]
 default-members = ["host-basic"]
 # exclude = []
-members = ["host-basic", "host-stress", "host-techno", "guest-sin", "guest-mul", "guest-techno", "host-egui", "guest-reverb"]
+members = [
+    "host-basic", 
+    "host-stress", 
+    "host-techno", 
+    "guest-sin", 
+    "guest-mul", 
+    "guest-techno", 
+    "host-egui", 
+    "guest-reverb",
+    "wasm-audio-utils"
+]
 resolver = "1"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+
+[workspace.dependencies]
+wasm-audio-utils = { path = "wasm-audio-utils" }

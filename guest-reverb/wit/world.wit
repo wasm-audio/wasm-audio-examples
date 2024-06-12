@@ -1,4 +1,4 @@
-package component:sin;
+package component:reverb;
 
 world audio {
      record param-info {

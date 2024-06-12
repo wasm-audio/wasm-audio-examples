@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 wit-bindgen-rt = { version = "0.26.0", features = ["bitflags"] }
 glicol = "0.13.5"
+wasm-audio-utils = { workspace = true }
 
 [lib]
 crate-type = ["cdylib"]

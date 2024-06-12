@@ -2,10 +2,9 @@
 mod bindings;
 use bindings::*;
 use glicol::Engine;
-use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::cell::RefCell;
 
-mod prelude;
+use wasm_audio_utils::*;
 
 init_param!(T1_AMP, 1.0);
 init_param!(T2_AMP, 0.6);
@@ -13,15 +12,15 @@ init_param!(T3_AMP, 0.05);
 init_param!(BPM, 120.0);
 
 thread_local! {
-    static CODE: Rc<RefCell<String>> = Rc::new(RefCell::new(include_str!("techno.glicol").into()));
-    static ENGINE: Rc<RefCell<Engine<128>>> = Rc::new(RefCell::new({
+    static CODE: RefCell<String> = RefCell::new(include_str!("techno.glicol").into());
+    static ENGINE: RefCell<Engine<128>> = RefCell::new({
         let mut engine = Engine::new();
         let code = make_code();
         engine.update_with_code(&code);
         engine.set_sr(48000);
         engine.livecoding = false;
         engine
-    }));
+    });
 }
 
 fn make_code() -> String {

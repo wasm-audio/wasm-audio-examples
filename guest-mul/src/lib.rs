@@ -3,8 +3,7 @@ mod bindings;
 
 use crate::bindings::ParamInfo;
 use bindings::Guest;
-mod prelude;
-use prelude::*;
+use wasm_audio_utils::*;
 
 init_param!(FACTOR, 1.0);
 
