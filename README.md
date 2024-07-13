@@ -1,5 +1,11 @@
 # wasm-audio-example
 
+
+
+https://github.com/user-attachments/assets/10eb64c9-e256-4021-a278-57cb981f3e92
+
+
+
 > WIP
 
 ensure you have Rust installed:
