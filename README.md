@@ -3,7 +3,7 @@
 > Note, this is just a WIP! 🛠️
 
 ## What is it?
-The WASM Component Audio Plugin allows developers to write audio plugins in various languages (demo provided in Rust and JavaScript), compile them to WebAssembly (WASM), and run them across different platforms. The demo showcases a desktop application built with Rust using egui as the host, which supports drag-and-drop functionality for already compiled .wasm files as guest plugins.
+The WASM Component allows developers to write audio plugins in various languages (demo provided in Rust and JavaScript), compile them to WebAssembly (WASM), and run them across different platforms. The demo showcases a desktop application built with Rust using egui as the host, which supports drag-and-drop functionality for already compiled .wasm files as guest plugins.
 
 https://github.com/user-attachments/assets/10eb64c9-e256-4021-a278-57cb981f3e92
 
